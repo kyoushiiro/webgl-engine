@@ -11,15 +11,17 @@ let vertexShaderSource = `#version 300 es
 		// Convert from 0->2 to -1->+1 (clip space)
 		vec2 clipSpace = zeroToTwo - 1.0;
 
-		gl_Position = vec4(clipSpace, 0, 1);
+		gl_Position = vec4(clipSpace * vec2(1, -1), 0, 1);
 	}
 `;
 
 let fragmentShaderSource = `#version 300 es
 	precision mediump float;
+	uniform vec4 u_Color;
 	out vec4 outColor;
+
 	void main() {
-		outColor = vec4(1, 0, 0.5, 1);
+		outColor = u_Color;
 	}
 `;
 
@@ -52,8 +54,8 @@ function createProgram(gl, vertexShader, fragmentShader) {
 
 function main() {
 	let canvas = document.getElementById("canv")
-	canvas.width = 400;
-	canvas.height = 400;
+	canvas.width = 600;
+	canvas.height = 600;
 	let gl = canvas.getContext("webgl2")
 	if (!gl) {
 		console.log("WebGL2 context not found!")
@@ -64,6 +66,7 @@ function main() {
 	let program = createProgram(gl, vertexShader, fragmentShader)
 
 	let resolutionUniformLocation = gl.getUniformLocation(program, "u_Resolution")
+	let colorLocation = gl.getUniformLocation(program, "u_Color")
 
 	let positionAttributeLocation = gl.getAttribLocation(program, "a_Position")
 	let positionBuffer = gl.createBuffer()
@@ -101,10 +104,38 @@ function main() {
 	gl.bindVertexArray(vao)
 	gl.uniform2f(resolutionUniformLocation, gl.canvas.width, gl.canvas.height)
 
-	let primitiveType = gl.TRIANGLES
-	let offset2 = 0
-	let count = 6
-	gl.drawArrays(primitiveType, offset2, count)
+	for(let ii = 0; ii < 50; ++ii) {
+		setRectangle(
+			gl, randomInt(300), randomInt(300), randomInt(300), randomInt(300)
+		)
+
+		gl.uniform4f(colorLocation, Math.random(), Math.random(), Math.random(), 1)
+
+		let primitiveType = gl.TRIANGLES
+		let offset = 0
+		let count = 6
+		gl.drawArrays(primitiveType, offset, count)
+	}
 }
 
 main()
+
+function randomInt(range) {
+	return Math.floor(Math.random() * range)
+}
+
+function setRectangle(gl, x, y, width, height) {
+	let x1 = x
+	let x2 = x + width
+	let y1 = y
+	let y2 = y + height
+
+	gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([
+		x1, y1,
+		x2, y1,
+		x1, y2,
+		x1, y2,
+		x2, y1,
+		x2, y2
+	]), gl.STATIC_DRAW)
+}
