@@ -1,4 +1,4 @@
-let vertexShaderSource = `#version 300 es
+let textureVertexShaderSource = `#version 300 es
 	in vec2 a_Position;
 	in vec2 a_TexCoord;
   uniform vec2 u_Resolution;  
@@ -20,7 +20,7 @@ let vertexShaderSource = `#version 300 es
 	}
 `;
 
-let fragmentShaderSource = `#version 300 es
+let textureFragmentShaderSource = `#version 300 es
   precision mediump float;
   
   uniform float u_Kernel[9];
@@ -49,3 +49,32 @@ let fragmentShaderSource = `#version 300 es
 	}
 `;
 
+let rectVertexShaderSource =`#version 300 es
+  in vec3 a_Position;
+
+  //uniform vec2 u_Resolution;
+  uniform mat4 u_ViewMatrix;
+  uniform mat4 u_ProjMatrix;
+
+  void main() {
+    vec2 zeroToOne = vec2(a_Position) / vec2(500.0, 500.0);
+    vec2 zeroToTwo = zeroToOne * 2.0;
+    vec2 clipSpace = zeroToTwo - 1.0;
+
+    //gl_Position = vec4(clipSpace * vec2(1, -1), 0, 1);
+
+    gl_Position = u_ProjMatrix * u_ViewMatrix * vec4(a_Position, 1.0);
+  }
+`
+
+let rectFragmentShaderSource =`#version 300 es
+  precision mediump float;
+  
+  uniform vec4 u_Color;
+
+  out vec4 outColor;
+
+  void main() {
+    outColor = u_Color;
+  }
+`
