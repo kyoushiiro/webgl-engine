@@ -12,7 +12,7 @@
  * Otherwise, new matrix is initialized by identity matrix.
  * @param opt_src source matrix(option)
  */
-var Matrix4 = function(opt_src) {
+export var Matrix4 = function(opt_src) {
   var i, s, d;
   if (opt_src && typeof opt_src === 'object' && opt_src.hasOwnProperty('elements')) {
     s = opt_src.elements;
@@ -749,3 +749,4 @@ var Vector4 = function(opt_src) {
   }
   this.elements = v;
 }
+
