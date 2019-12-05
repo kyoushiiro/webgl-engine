@@ -1,0 +1,28 @@
+{
+  "name": "webgl-engine",
+  "version": "1.0.0",
+  "description": "A game engine built upon WebGL 2.0. Created for fun and for learning computer graphics, WebGL, front-end development, and Git.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/kyoushiiro/webgl-engine.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/kyoushiiro/webgl-engine/issues"
+  },
+  "homepage": "https://github.com/kyoushiiro/webgl-engine#readme",
+  "devDependencies": {
+    "clean-webpack-plugin": "^3.0.0",
+    "css-loader": "^3.2.1",
+    "html-webpack-plugin": "^3.2.0",
+    "style-loader": "^1.0.1",
+    "webpack": "^4.41.2",
+    "webpack-dev-server": "^3.9.0"
+  }
+}

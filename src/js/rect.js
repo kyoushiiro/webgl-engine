@@ -1,6 +1,6 @@
 class Rect extends RenderObj{
-  constructor(vertices, shader, x=0, y=0, width=50, height=50) {
-    super(vertices, shader)
+  constructor(shader, x=0, y=0, width=50, height=50) {
+    super(shader)
     this.x = x
     this.y = y
     this.width = width

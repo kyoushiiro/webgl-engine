@@ -1,3 +1,5 @@
+"use strict";
+
 let objects = []
 
 let gl = null;
@@ -15,6 +17,10 @@ let uniforms = {}
 
 let attributes = {}
 
+let fov = 60;
+let eyeX = 250, eyeY = 250, eyeZ = -500;
+let lookX = 250, lookY = 250, lookZ = 0;
+
 function main() {
   // Set up WebGL 2
   canvas = document.getElementById("canv")
@@ -22,6 +28,38 @@ function main() {
   canvas.height = 500
   gl = canvas.getContext("webgl2")
   checkIfExists(gl, "WebGL2 context")
+
+  let slider_fov = document.getElementById("slider_fov");
+  fov = slider_fov.value; // Display the default slider value
+  
+  // Update the current slider value (each time you drag the slider handle)
+  slider_fov.oninput = function() {
+    fov = this.value;
+    drawScene(gl, canvas);
+  }
+
+  document.addEventListener("keydown", function(e) {
+    if(e.keyCode == 65){
+        eyeX -= 5;
+        lookX -= 5;
+    }
+    else if(e.keyCode == 68) {
+        eyeX += 5;
+        lookX += 5;
+    }
+    else if(e.keyCode == 83){
+        eyeZ -= 5;
+        lookZ -= 5;
+    }
+    else if(e.keyCode == 87) {
+        eyeZ += 5;
+        lookZ += 5;
+    }
+    else {
+        return;
+    }
+    drawScene(gl, canvas);
+  });
 
   // Create and set shaders
   let vShader = createShader(gl, gl.VERTEX_SHADER, textureVertexShaderSource)
@@ -56,7 +94,7 @@ function main() {
   gl.useProgram(rectProg)
 
   // Set and store uniform locations for rectangle shaders
-  uniformNames[rectProg] = ["u_Color", "u_ViewMatrix", "u_ProjMatrix"]
+  uniformNames[rectProg] = ["u_Color", "u_ViewMatrix", "u_ProjMatrix", "u_ModelMatrix"]
   for(let u_var of uniformNames[rectProg]) {
     let uniformLocation = gl.getUniformLocation(rectProg, u_var)
     checkIfExists(uniformLocation, u_var)
@@ -68,9 +106,11 @@ function main() {
   checkIfExists(positionAttributeLocation2, "a_Position")
   attributes["a_Position"+"_rect"] = positionAttributeLocation2
 
-  objects.push(new Rect(null, rectProg, 50, 50, 200, 200))
-  objects.push(new Rect(null, rectProg, 250, 50, 200, 200))
-  objects.push(new Rect(null, rectProg, 50, 250, 200, 200))
+  objects.push(new Rect(rectProg, 50, 50, 200, 200))
+  objects.push(new Rect(rectProg, 250, 50, 200, 200))
+  objects.push(new Rect(rectProg, 50, 250, 200, 200))
+
+  objects.push(new FShape(rectProg, 100, 100))
   drawScene(gl, canvas)
   /*
   //------------------------------------------------------------
@@ -88,13 +128,12 @@ function main() {
   */
 }
 
-let translation = [0, 0]
 let width = 100
 let height = 30
 let color = [Math.random(), Math.random(), Math.random(), 1]
 
 function drawScene(gl, canvas) {
-  //gl.viewport(0, 0, canvas.width, canvas.height)
+  gl.viewport(0, 0, canvas.width, canvas.height)
   gl.clearColor(0,0,0,0)
   gl.clear(gl.COLOR_BUFFER_BIT, gl.DEPTH_BUFFER_BIT)
 
@@ -119,13 +158,16 @@ function drawScene(gl, canvas) {
     )
 
     gl.bufferData(gl.ARRAY_BUFFER, renderObj.vertices, gl.STATIC_DRAW)
+    
+    gl.uniformMatrix4fv(uniforms["u_ModelMatrix_rect"], false, renderObj.modelMatrix.elements)
 
     let viewMatrix = new Matrix4()
-    viewMatrix.setLookAt(0, 0, 0.2, 0, 0, 0, 0, 1, 0)
+    viewMatrix.setLookAt(eyeX, eyeY, eyeZ, lookX, lookY, lookZ, 0, -1, 0)
     gl.uniformMatrix4fv(uniforms["u_ViewMatrix_rect"], false, viewMatrix.elements)
 
     let projMatrix = new Matrix4()
-    projMatrix.setOrtho(0, 500, 500, 0, 0.001, 1000)
+    //projMatrix.setOrtho(0, canvas.width, canvas.height, 0, 0.01, 1000)
+    projMatrix.setPerspective(fov, canvas.width/canvas.height, 0.001, 1000);
     gl.uniformMatrix4fv(uniforms["u_ProjMatrix_rect"], false, projMatrix.elements)
 
     color = [Math.random(), Math.random(), Math.random(), 1]
@@ -133,10 +175,9 @@ function drawScene(gl, canvas) {
   
     let primitiveType = gl.TRIANGLES
     offset = 0
-    let count = 6
+    let count = (renderObj.vertices.length)/3
     gl.drawArrays(primitiveType, offset, count)
   }
-
   
 }
 
