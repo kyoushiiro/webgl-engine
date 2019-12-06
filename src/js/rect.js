@@ -1,6 +1,6 @@
 import { RenderObj } from './RenderObj.js';
 
-class Rect extends RenderObj{
+export class Rect extends RenderObj{
   constructor(shader, x=0, y=0, width=50, height=50) {
     super(shader);
     this.x = x;
@@ -31,5 +31,3 @@ class Rect extends RenderObj{
   render() {
   }
 }
-
-export default { Rect };

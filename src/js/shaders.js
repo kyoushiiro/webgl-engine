@@ -72,3 +72,6 @@ let rectFragmentShaderSource =`#version 300 es
     outColor = u_Color;
   }
 `
+
+export { textureVertexShaderSource, textureFragmentShaderSource, 
+        rectVertexShaderSource, rectFragmentShaderSource };

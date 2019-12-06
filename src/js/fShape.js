@@ -1,4 +1,6 @@
-class FShape extends RenderObj{
+import { RenderObj } from './RenderObj.js';
+
+export class FShape extends RenderObj{
   constructor(shader, x=0, y=0) {
     super(shader)
     this.x = x

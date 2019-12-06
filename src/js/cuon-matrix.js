@@ -700,7 +700,7 @@ Matrix4.prototype.dropShadowDirectionally = function(normX, normY, normZ, planeX
  * If opt_src is specified, new vector is initialized by opt_src.
  * @param opt_src source vector(option)
  */
-var Vector3 = function(opt_src) {
+export var Vector3 = function(opt_src) {
   var v = new Float32Array(3);
   if (opt_src && typeof opt_src === 'object') {
     v[0] = opt_src[0]; v[1] = opt_src[1]; v[2] = opt_src[2];
@@ -742,7 +742,7 @@ Vector3.prototype.length = function() {
  * If opt_src is specified, new vector is initialized by opt_src.
  * @param opt_src source vector(option)
  */
-var Vector4 = function(opt_src) {
+export var Vector4 = function(opt_src) {
   var v = new Float32Array(4);
   if (opt_src && typeof opt_src === 'object') {
     v[0] = opt_src[0]; v[1] = opt_src[1]; v[2] = opt_src[2]; v[3] = opt_src[3];

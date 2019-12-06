@@ -5,7 +5,7 @@ const { CleanWebpackPlugin } = require('clean-webpack-plugin');
 module.exports = {
   mode: 'development',
   entry: {
-    app: './src/js/index.js',
+    app: './src/js/main.js',
   },
   devtool: 'inline-souce-map',
   devServer: {
@@ -24,6 +24,7 @@ module.exports = {
     new CleanWebpackPlugin(),
     new HtmlWebpackPlugin({
       title: 'WebGL Engine',
+      template: './src/index-template.html',
     }),
   ],
   output: {

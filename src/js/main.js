@@ -1,5 +1,13 @@
 "use strict";
 
+import { RenderObj } from './RenderObj.js';
+import { Rect } from './Rect.js';
+import { FShape } from './FShape.js';
+import { Matrix4 } from './cuon-matrix.js';
+import { Program } from './webgl-utils.js';
+import { textureVertexShaderSource, textureFragmentShaderSource, 
+        rectVertexShaderSource, rectFragmentShaderSource } from './shaders.js';
+
 let objects = []
 
 let gl = null;
@@ -62,9 +70,9 @@ function main() {
   });
 
   // Create and set shaders
-  let vShader = createShader(gl, gl.VERTEX_SHADER, textureVertexShaderSource)
-  let fShader = createShader(gl, gl.FRAGMENT_SHADER, textureFragmentShaderSource)
-  let textureProg = createProgram(gl, vShader, fShader)
+  let vShader = Program.createShader(gl, gl.VERTEX_SHADER, textureVertexShaderSource)
+  let fShader = Program.createShader(gl, gl.FRAGMENT_SHADER, textureFragmentShaderSource)
+  let textureProg = Program.createProgram(gl, vShader, fShader)
   checkIfExists(textureProg, "Texture program")
   gl.useProgram(textureProg)
 
@@ -87,9 +95,9 @@ function main() {
 
   //------------------------------------------------------------
   // Create shader program for rectangle shaders
-  let vShader2 = createShader(gl, gl.VERTEX_SHADER, rectVertexShaderSource)
-  let fShader2 = createShader(gl, gl.FRAGMENT_SHADER, rectFragmentShaderSource)
-  let rectProg = createProgram(gl, vShader2, fShader2)
+  let vShader2 = Program.createShader(gl, gl.VERTEX_SHADER, rectVertexShaderSource)
+  let fShader2 = Program.createShader(gl, gl.FRAGMENT_SHADER, rectFragmentShaderSource)
+  let rectProg = Program.createProgram(gl, vShader2, fShader2)
   checkIfExists(rectProg, "Rectangle program")
   gl.useProgram(rectProg)
 
