@@ -2,7 +2,6 @@
 
 import { Rect } from './geometries/Rect.js';
 import { Cube } from './geometries/Cube.js';
-import { FShape } from './geometries/ShapeF.js';
 import { Program } from './shaders/Program.js';
 import { Camera } from './Camera.js';
 import {
@@ -39,7 +38,6 @@ function main() {
   canvas.width = 500;
   canvas.height = 500;
   gl = canvas.getContext('webgl2');
-  checkIfExists(gl, 'WebGL2 context');
 
   let slider_fov = document.getElementById('slider_fov');
   fov = slider_fov.value; // Display the default slider value
@@ -71,7 +69,6 @@ function main() {
     rectVertexShaderSource,
     rectFragmentShaderSource
   );
-  checkIfExists(rectProg, 'Rectangle program');
   gl.useProgram(rectProg.program);
 
   // Set and store uniform locations for rectangle shaders
@@ -83,7 +80,7 @@ function main() {
   ];
   for (let u_var of uniformNames[rectProg]) {
     let uniformLocation = gl.getUniformLocation(rectProg.shader, u_var);
-    checkIfExists(uniformLocation, u_var);
+    // checkIfExists(uniformLocation, u_var);
     uniforms[u_var] = uniformLocation;
     rectProg.uniforms[u_var] = uniformLocation;
   }
@@ -93,7 +90,6 @@ function main() {
     rectProg.shader,
     'a_Position'
   );
-  checkIfExists(positionAttributeLocation2, 'a_Position');
   attributes['a_Position'] = positionAttributeLocation2;
   rectProg.attributes['a_Position'] = positionAttributeLocation2;
 
@@ -129,14 +125,3 @@ function drawScene(canvas) {
 // Run this code only
 //----------------------------------
 main();
-
-//----------------------------------
-// End of ran code
-//------------------
-function checkIfExists(obj, objName) {
-  if (obj == null || obj < 0) {
-    console.log(objName + ' not found!');
-  } else {
-    //console.log(objName + " found successfully!")
-  }
-}

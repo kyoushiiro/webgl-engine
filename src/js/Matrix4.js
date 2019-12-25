@@ -879,6 +879,53 @@ Matrix4.prototype.lookAt = function(
     )
   );
 };
+/**
+ * Set the viewing matrix using eye, pitch, and yaw.
+ * Pitch must be in the range of [-90 ... 90] degrees and
+ * yaw must be in the range of [0 ... 360] degrees.
+ * Pitch and yaw variables must be expressed in radians.
+ *
+ * @param eyeX, eyeY, eyeZ The position of the eye point.
+ * @param pitch The angle about the x-axis expressed in RADIANS
+ * @param yaw The angle about the y-axis expressed in RADIANS
+ * @return this
+ */
+Matrix4.prototype.setFPSLookAt = function(eyeX, eyeY, eyeZ, pitch, yaw) {
+  let cosPitch = Math.cos(pitch);
+  let sinPitch = Math.sin(pitch);
+  let cosYaw = Math.cos(yaw);
+  let sinYaw = Math.sin(yaw);
+
+  let xaxis = [cosYaw, 0, -sinYaw];
+  let yaxis = [sinYaw * sinPitch, cosPitch, cosYaw * sinPitch];
+  let zaxis = [sinYaw * cosPitch, -sinPitch, cosPitch * cosYaw];
+
+  // Set to this.
+  let e = this.elements;
+  e[0] = xaxis[0];
+  e[1] = yaxis[0];
+  e[2] = zaxis[0];
+  e[3] = 0;
+
+  e[4] = xaxis[1];
+  e[5] = yaxis[1];
+  e[6] = zaxis[1];
+  e[7] = 0;
+
+  e[8] = xaxis[2];
+  e[9] = yaxis[2];
+  e[10] = zaxis[2];
+  e[11] = 0;
+
+  // vec4( -dot( xaxis, eye ), -dot( yaxis, eye ), -dot( zaxis, eye ), 1 )
+  e[12] = 0;
+  e[13] = 0;
+  e[14] = 0;
+  e[15] = 1;
+
+  // Translate.
+  return this.translate(-eyeX, -eyeY, -eyeZ);
+};
 
 /**
  * Multiply the matrix for project vertex to plane from the right.

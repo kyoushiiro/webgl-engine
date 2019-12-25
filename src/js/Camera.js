@@ -11,6 +11,7 @@ export class Camera {
         lookX, lookY, lookZ, 
         0, 1, 0
     );
+    this.viewMatrix = new Matrix4().setFPSLookAt(eyeX, eyeY, eyeZ, 0, 0);
     this.projMatrix = new Matrix4().setPerspective(fov, aspect, 0.001, 1000);
   }
 }
