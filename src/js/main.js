@@ -4,28 +4,13 @@ import { Rect } from './geometries/Rect.js';
 import { Cube } from './geometries/Cube.js';
 import { Program } from './shaders/Program.js';
 import { Camera } from './Camera.js';
-import {
-  rectVertexShaderSource,
-  rectFragmentShaderSource,
-} from './shaders/shaders.js';
+import { BASE_VERTEX_SOURCE, BASE_FRAGMENT_SOURCE } from './shaders/shaders.js';
 import { Renderer } from './Renderer.js';
 
-let objects = [];
+let objectsByShader = {};
 
 let gl = null;
 let canvas = null;
-
-// Dictionary containing the names of all uniforms in each shader
-// Keys: Program (already created with vertex/frag shader)
-// Values: List of uniforms in the given shader
-let uniformNames = {};
-
-// Dictionary containing the names of all uniforms and their uniform location
-// Keys: Uniform name (string)
-// Values: WebGL Uniform Location
-let uniforms = {};
-
-let attributes = {};
 
 let fov = 60;
 let eyeX = 250,
@@ -63,45 +48,33 @@ function main() {
     drawScene(canvas);
   });
 
-  let rectProg = new Program(
+  let baseShader = new Program(
     gl,
-    'RectProgram',
-    rectVertexShaderSource,
-    rectFragmentShaderSource
+    'Base Shader',
+    BASE_VERTEX_SOURCE,
+    BASE_FRAGMENT_SOURCE,
+    [
+      'u_ViewMatrix',
+      'u_ProjMatrix',
+      'u_ModelMatrix',
+      'u_LightColor',
+      'u_LightDir',
+    ],
+    ['a_Position', 'a_Color', 'a_Normal']
   );
-  gl.useProgram(rectProg.program);
-
-  // Set and store uniform locations for rectangle shaders
-  uniformNames[rectProg] = [
-    'u_Color',
-    'u_ViewMatrix',
-    'u_ProjMatrix',
-    'u_ModelMatrix',
-  ];
-  for (let u_var of uniformNames[rectProg]) {
-    let uniformLocation = gl.getUniformLocation(rectProg.shader, u_var);
-    // checkIfExists(uniformLocation, u_var);
-    uniforms[u_var] = uniformLocation;
-    rectProg.uniforms[u_var] = uniformLocation;
-  }
-
-  // Set and store attribute locations for rectangle shaders
-  let positionAttributeLocation2 = gl.getAttribLocation(
-    rectProg.shader,
-    'a_Position'
-  );
-  attributes['a_Position'] = positionAttributeLocation2;
-  rectProg.attributes['a_Position'] = positionAttributeLocation2;
+  gl.useProgram(baseShader.program);
+  objectsByShader[baseShader] = [];
 
   let color = [Math.random(), Math.random(), Math.random(), 1];
-  objects.push(new Rect(rectProg, 50, 50, 200, 200, color));
-  color = [Math.random(), Math.random(), Math.random(), 1];
-  // objects.push(new Rect(rectProg, 250, 50, 200, 200, color));
-  // color = [Math.random(), Math.random(), Math.random(), 1];
-  // objects.push(new Rect(rectProg, 50, 250, 200, 200, color));
+  let floor = new Rect(baseShader, 0, 0, 0, 10000, 10000, color);
+  floor.modelMatrix.rotate(-90, 1, 0, 0);
+  floor.modelMatrix.translate(-5000, -5000, 0);
+  objectsByShader[baseShader].push(floor);
 
   color = [Math.random(), Math.random(), Math.random(), 1];
-  objects.push(new Cube(rectProg, 100, 150, 100, 200, 200, 200, color));
+  objectsByShader[baseShader].push(
+    new Cube(baseShader, 100, 150, 100, 200, 200, 200, color)
+  );
 
   drawScene(canvas);
 }
@@ -118,7 +91,9 @@ function drawScene(canvas) {
     fov
   );
   let r = new Renderer(canvas);
-  r.render(objects, camera);
+  for (let objList of Object.keys(objectsByShader)) {
+    r.render(objectsByShader[objList], camera);
+  }
 }
 
 //----------------------------------

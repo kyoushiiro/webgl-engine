@@ -1,4 +1,4 @@
-import { Matrix4 } from './Matrix4.js';
+import { Matrix4, Vector3 } from './Matrix4.js';
 
 export class Renderer {
   constructor(canvas) {
@@ -6,13 +6,13 @@ export class Renderer {
 
     // Setup the GL Context
     this.gl.viewport(0, 0, canvas.width, canvas.height);
-    this.gl.clearColor(0, 0, 0, 0);
-    // this.gl.enable(this.gl.DEPTH_TEST);
+    this.gl.clearColor(0, 0, 0, 1);
+    this.gl.enable(this.gl.DEPTH_TEST);
   }
 
   render(scene, camera) {
     let gl = this.gl;
-    this.gl.clear(gl.COLOR_BUFFER_BIT, gl.DEPTH_BUFFER_BIT);
+    this.gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
     let currentProgram = '';
     for (let obj of scene) {
@@ -24,6 +24,7 @@ export class Renderer {
         this.gl.useProgram(obj.program.shader);
         currentProgram = obj.program.name;
 
+        // Camera controls! (view/projection)
         this.gl.uniformMatrix4fv(
           obj.program.uniforms['u_ProjMatrix'],
           false,
@@ -34,7 +35,18 @@ export class Renderer {
           false,
           camera.viewMatrix.elements
         );
+
+        // Lights! (color, direction, intensity)
+        this.gl.uniform3f(obj.program.uniforms['u_LightColor'], 1.0, 1.0, 1.0);
+        let lightDirection = new Vector3([3.5, 3.0, 4.0]);
+        lightDirection.normalize();
+        gl.uniform3fv(
+          obj.program.uniforms['u_LightDir'],
+          lightDirection.elements
+        );
       }
+
+      // Send
 
       // Send the model matrix for each obj.
       gl.uniformMatrix4fv(
@@ -48,32 +60,35 @@ export class Renderer {
       gl.bindVertexArray(vao);
 
       let positionBuffer = this.gl.createBuffer();
-      this.gl.enableVertexAttribArray(obj.program.attributes['a_Position']);
       this.gl.bindBuffer(this.gl.ARRAY_BUFFER, positionBuffer);
 
+      let FSIZE = obj.vertices.BYTES_PER_ELEMENT;
       let size = 3;
       let type = gl.FLOAT;
       let normalize = false;
-      let stride = 0;
+      let stride = Object.keys(obj.program.attributes).length * 3 * FSIZE;
       let offset = 0;
-      gl.vertexAttribPointer(
-        obj.program.attributes['a_Position'],
-        size,
-        type,
-        normalize,
-        stride,
-        offset
-      );
+
+      for (let attr of Object.values(obj.program.attributes)) {
+        gl.enableVertexAttribArray(attr);
+        gl.vertexAttribPointer(attr, size, type, normalize, stride, offset);
+        offset += 3 * FSIZE;
+      }
 
       gl.bufferData(gl.ARRAY_BUFFER, obj.vertices, gl.STATIC_DRAW);
 
-      let color = obj.color; // This should be the obj color
-      gl.uniform4fv(obj.program.uniforms['u_Color'], color);
-
       let primitiveType = gl.TRIANGLES;
       offset = 0;
-      let count = obj.vertices.length / 3;
-      gl.drawArrays(primitiveType, offset, count);
+      let count = obj.vertices.length / 6;
+      // gl.drawArrays(primitiveType, offset, count);
+      if (obj.indices != null) {
+        let indexBuffer = this.gl.createBuffer();
+        gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, indexBuffer);
+        gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, obj.indices, gl.STATIC_DRAW);
+        gl.drawElements(gl.TRIANGLES, obj.indices.length, gl.UNSIGNED_BYTE, 0);
+      } else {
+        gl.drawArrays(primitiveType, offset, count);
+      }
     }
   }
 }

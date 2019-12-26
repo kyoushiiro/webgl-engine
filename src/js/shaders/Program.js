@@ -1,13 +1,41 @@
 export class Program {
-  constructor(gl, name, vShader, fShader) {
+  constructor(gl, name, vShader, fShader, uniforms, attributes) {
     let vertexShader = Program.createShader(gl, gl.VERTEX_SHADER, vShader);
     let fragmentShader = Program.createShader(gl, gl.FRAGMENT_SHADER, fShader);
     let program = Program.createProgram(gl, vertexShader, fragmentShader);
 
     this.shader = program;
     this.name = name;
-    this.uniforms = {};
-    this.attributes = {};
+    this.uniforms = this.getUniforms(gl, uniforms);
+    this.attributes = this.getAttributes(gl, attributes);
+  }
+
+  getUniforms(gl, uniforms) {
+    let res = {};
+    for (let u_var of uniforms) {
+      let uniformLocation = gl.getUniformLocation(this.shader, u_var);
+      if (uniformLocation === null || uniformLocation < 0) {
+        console.error(
+          `Couldn't locate uniform variable ${u_var} for ${this.name}!`
+        );
+        continue;
+      }
+      res[u_var] = uniformLocation;
+    }
+    return res;
+  }
+
+  getAttributes(gl, attributes) {
+    let res = {};
+    for (let a_var of attributes) {
+      let attributeLocation = gl.getAttribLocation(this.shader, a_var);
+      if (attributeLocation == null || attributeLocation < 0) {
+        console.error(`Couldn't locate attribute variable ${a_var}!`);
+        continue;
+      }
+      res[a_var] = attributeLocation;
+    }
+    return res;
   }
 
   static createShader(gl, type, source) {
@@ -19,6 +47,7 @@ export class Program {
       return shader;
     }
 
+    console.log(source);
     console.log(gl.getShaderInfoLog(shader));
     gl.deleteShader(shader);
   }
