@@ -59,8 +59,13 @@ const BASE_VERTEX_SOURCE = `#version 300 es
   uniform mat4 u_ModelMatrix;
   uniform mat4 u_ViewMatrix;
   uniform mat4 u_ProjMatrix;
-  uniform vec3 u_LightColor; // Light color
+
+  uniform float u_Ka;
+  uniform float u_Kd;
+
+  uniform vec3 u_LightColor; // Light color for diffuse
   uniform vec3 u_LightDir; // World coordinate, normalized
+  uniform vec3 u_AmbientColor;
 
   void main() {
     gl_Position = u_ProjMatrix * u_ViewMatrix * u_ModelMatrix * a_Position;
@@ -68,7 +73,7 @@ const BASE_VERTEX_SOURCE = `#version 300 es
     float nDotL = max(dot(u_LightDir, normal), 0.0);
     vec3 diffuse = u_LightColor * vec3(a_Color) * nDotL;
 
-    v_Color = vec4(diffuse, a_Color.a);
+    v_Color = vec4(u_Kd * diffuse + u_Ka * u_AmbientColor, a_Color.a);
   }
 `;
 

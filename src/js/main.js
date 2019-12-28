@@ -8,20 +8,25 @@ import { BASE_VERTEX_SOURCE, BASE_FRAGMENT_SOURCE } from './shaders/shaders.js';
 import { Renderer } from './Renderer.js';
 
 let objectsByShader = {};
+let camera = null;
 
 let gl = null;
 let canvas = null;
+let r = null;
 
 let fov = 60;
-let eyeX = 250,
-  eyeY = 250,
-  eyeZ = 500;
+let eyeX = 50,
+  eyeY = 5,
+  eyeZ = 50;
+
+let pitch = 0;
+let yaw = 0;
 
 function main() {
   // Set up WebGL 2
   canvas = document.getElementById('canv');
-  canvas.width = 500;
-  canvas.height = 500;
+  canvas.width = 800;
+  canvas.height = 800;
   gl = canvas.getContext('webgl2');
 
   let slider_fov = document.getElementById('slider_fov');
@@ -33,15 +38,44 @@ function main() {
     drawScene(canvas);
   };
 
+  canvas.requestPointerLock =
+    canvas.requestPointerLock || canvas.mozRequestPointerLock;
+  document.exitPointerLock =
+    document.exitPointerLock || document.mozExitPointerLock;
+
+  canvas.addEventListener('click', function() {
+    canvas.requestPointerLock();
+  });
+
+  document.addEventListener('pointerlockchange', lockChangeAlert, false);
+  document.addEventListener('mozpointerlockchange', lockChangeAlert, false);
+
+  function lockChangeAlert() {
+    if (
+      document.pointerLockElement === canvas ||
+      document.mozPointerLockElement === canvas
+    ) {
+      document.addEventListener('mousemove', updateRotation, false);
+    } else {
+      document.removeEventListener('mousemove', updateRotation, false);
+    }
+  }
+
+  function updateRotation(e) {
+    yaw -= e.movementX * 0.003;
+    pitch -= e.movementY * 0.003;
+    drawScene();
+  }
+
   document.addEventListener('keydown', function(e) {
     if (e.keyCode == 65) {
-      eyeX -= 5;
+      camera.moveEyeRight(-1);
     } else if (e.keyCode == 68) {
-      eyeX += 5;
+      camera.moveEyeRight(1);
     } else if (e.keyCode == 83) {
-      eyeZ += 5;
+      camera.moveEyeForward(-1);
     } else if (e.keyCode == 87) {
-      eyeZ -= 5;
+      camera.moveEyeForward(1);
     } else {
       return;
     }
@@ -59,28 +93,26 @@ function main() {
       'u_ModelMatrix',
       'u_LightColor',
       'u_LightDir',
+      'u_AmbientColor',
+      'u_Ka',
+      'u_Kd',
     ],
     ['a_Position', 'a_Color', 'a_Normal']
   );
   gl.useProgram(baseShader.program);
   objectsByShader[baseShader] = [];
 
-  let color = [Math.random(), Math.random(), Math.random(), 1];
-  let floor = new Rect(baseShader, 0, 0, 0, 10000, 10000, color);
-  floor.modelMatrix.rotate(-90, 1, 0, 0);
-  floor.modelMatrix.translate(-5000, -5000, 0);
+  let color = [0.8, 0.5, 0.7, 1];
+  let floor = new Cube(baseShader, -300, -1, 300, 600, 1, 600, color);
+  //floor.modelMatrix.translate(-5000, -5000, 0);
   objectsByShader[baseShader].push(floor);
 
   color = [Math.random(), Math.random(), Math.random(), 1];
   objectsByShader[baseShader].push(
-    new Cube(baseShader, 100, 150, 100, 200, 200, 200, color)
+    new Cube(baseShader, 0, 1, -10, 20, 20, 20, color)
   );
 
-  drawScene(canvas);
-}
-
-function drawScene(canvas) {
-  let camera = new Camera(
+  camera = new Camera(
     eyeX,
     eyeY,
     eyeZ,
@@ -90,7 +122,14 @@ function drawScene(canvas) {
     canvas.width / canvas.height,
     fov
   );
-  let r = new Renderer(canvas);
+  camera.updateFPSView(pitch, yaw);
+  r = new Renderer(canvas, gl);
+  drawScene();
+}
+
+function drawScene() {
+  camera.updateFPSView(pitch, yaw);
+  // camera.updateEye(eyeX, eyeY, eyeZ);
   for (let objList of Object.keys(objectsByShader)) {
     r.render(objectsByShader[objList], camera);
   }

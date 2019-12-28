@@ -9,7 +9,7 @@ export class Cube extends RenderObj {
     width = 50,
     height = 50,
     depth = 50,
-    color
+    color = [1, 1, 1]
   ) {
     super(prog);
     this.x = x;
@@ -82,7 +82,7 @@ export class Cube extends RenderObj {
       12, 13, 14, 12, 14, 15,
       16, 17, 18, 16, 18, 19,
       20, 21, 22, 20, 22, 23,
-    ]
+    ];
 
     return [new Float32Array(vertices), new Uint8Array(indices)];
   }
