@@ -84,7 +84,7 @@ export class Cube extends RenderObj {
       20, 21, 22, 20, 22, 23,
     ];
 
-    return [new Float32Array(vertices), new Uint8Array(indices)];
+    return [new Float32Array(vertices), new Uint16Array(indices)];
   }
 
   render() {}

@@ -1,9 +1,10 @@
 import { Vector3, Matrix4 } from './Matrix4.js';
 
 export class Camera {
-  constructor(eyeX, eyeY, eyeZ, lookX, lookY, lookZ, aspect = 1.0, fov = 60) {
+  constructor(eyeX, eyeY, eyeZ, pitch, yaw, aspect = 1.0, fov = 60) {
     this.eye = new Vector3([eyeX, eyeY, eyeZ]);
-    this.target = new Vector3([lookX, lookY, lookZ]);
+    // Used for "lookAt" matrix vs FPS style
+    // this.target = new Vector3([lookX, lookY, lookZ]);
 
     // prettier-ignore
     // this.viewMatrix = new Matrix4().setLookAt(
@@ -11,8 +12,9 @@ export class Camera {
     //     lookX, lookY, lookZ,
     //     0, 1, 0
     // );
+
     this.viewMatrix = new Matrix4().setFPSLookAt(eyeX, eyeY, eyeZ, 0.0, 0.0);
-    this.projMatrix = new Matrix4().setPerspective(fov, aspect, 0.001, 10000);
+    this.projMatrix = new Matrix4().setPerspective(fov, aspect, 0.001, 2000);
   }
 
   getViewMatrix() {

@@ -93,7 +93,8 @@ export class Renderer {
         let indexBuffer = this.gl.createBuffer();
         gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, indexBuffer);
         gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, obj.indices, gl.STATIC_DRAW);
-        gl.drawElements(gl.TRIANGLES, obj.indices.length, gl.UNSIGNED_BYTE, 0);
+        console.log(gl.UNSIGNED_BYTE);
+        gl.drawElements(gl.TRIANGLES, obj.indices.length, gl.UNSIGNED_SHORT, 0);
       } else {
         gl.drawArrays(primitiveType, offset, count);
       }

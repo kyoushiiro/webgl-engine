@@ -6,6 +6,8 @@ import { Program } from './shaders/Program.js';
 import { Camera } from './Camera.js';
 import { BASE_VERTEX_SOURCE, BASE_FRAGMENT_SOURCE } from './shaders/shaders.js';
 import { Renderer } from './Renderer.js';
+import exampleObj from './../../example.obj';
+import { Obj } from './geometries/Obj.js';
 
 let objectsByShader = {};
 let camera = null;
@@ -15,9 +17,9 @@ let canvas = null;
 let r = null;
 
 let fov = 60;
-let eyeX = 50,
-  eyeY = 5,
-  eyeZ = 50;
+let eyeX = 2,
+  eyeY = 1,
+  eyeZ = 5;
 
 let pitch = 0;
 let yaw = 0;
@@ -68,14 +70,15 @@ function main() {
   }
 
   document.addEventListener('keydown', function(e) {
+    let speed = 0.1;
     if (e.keyCode == 65) {
-      camera.moveEyeRight(-1);
+      camera.moveEyeRight(-speed);
     } else if (e.keyCode == 68) {
-      camera.moveEyeRight(1);
+      camera.moveEyeRight(speed);
     } else if (e.keyCode == 83) {
-      camera.moveEyeForward(-1);
+      camera.moveEyeForward(-speed);
     } else if (e.keyCode == 87) {
-      camera.moveEyeForward(1);
+      camera.moveEyeForward(speed);
     } else {
       return;
     }
@@ -103,22 +106,24 @@ function main() {
   objectsByShader[baseShader] = [];
 
   let color = [0.8, 0.5, 0.7, 1];
-  let floor = new Cube(baseShader, -300, -1, 300, 600, 1, 600, color);
-  //floor.modelMatrix.translate(-5000, -5000, 0);
+  let floor = new Cube(baseShader, -100, -1, 100, 200, 1, 200, color);
   objectsByShader[baseShader].push(floor);
 
-  color = [Math.random(), Math.random(), Math.random(), 1];
+  color = [Math.random() + 0.2, Math.random() + 0.2, Math.random() + 0.2, 1];
   objectsByShader[baseShader].push(
-    new Cube(baseShader, 0, 1, -10, 20, 20, 20, color)
+    new Cube(baseShader, 0, 0, -10, 1, 1, 1, color)
   );
+
+  let obj = new Obj(baseShader, exampleObj);
+  obj.modelMatrix.translate(0, 2, 0);
+  objectsByShader[baseShader].push(obj);
 
   camera = new Camera(
     eyeX,
     eyeY,
     eyeZ,
-    eyeX,
-    eyeY,
-    eyeZ - 500,
+    pitch,
+    yaw,
     canvas.width / canvas.height,
     fov
   );

@@ -18,6 +18,10 @@ module.exports = {
         test: /\.css$/,
         use: ['style-loader', 'css-loader'],
       },
+      {
+        test: /\.obj$/,
+        loader: 'webpack-obj-loader',
+      },
     ],
   },
   plugins: [
