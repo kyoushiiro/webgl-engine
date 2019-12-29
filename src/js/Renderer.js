@@ -64,39 +64,19 @@ export class Renderer {
         obj.modelMatrix.elements
       );
 
-      // Now send the vertex data for each obj
-      let vao = this.gl.createVertexArray();
-      gl.bindVertexArray(vao);
-
-      let positionBuffer = this.gl.createBuffer();
-      this.gl.bindBuffer(this.gl.ARRAY_BUFFER, positionBuffer);
-
-      let FSIZE = obj.vertices.BYTES_PER_ELEMENT;
-      let size = 3;
-      let type = gl.FLOAT;
-      let normalize = false;
-      let stride = Object.keys(obj.program.attributes).length * 3 * FSIZE;
-      let offset = 0;
-
-      for (let attr of Object.values(obj.program.attributes)) {
-        gl.enableVertexAttribArray(attr);
-        gl.vertexAttribPointer(attr, size, type, normalize, stride, offset);
-        offset += 3 * FSIZE;
-      }
-
-      gl.bufferData(gl.ARRAY_BUFFER, obj.vertices, gl.STATIC_DRAW);
-
-      let primitiveType = gl.TRIANGLES;
-      offset = 0;
-      let count = obj.vertices.length / 6;
-      if (obj.indices != null) {
-        let indexBuffer = this.gl.createBuffer();
-        gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, indexBuffer);
-        gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, obj.indices, gl.STATIC_DRAW);
-        console.log(gl.UNSIGNED_BYTE);
-        gl.drawElements(gl.TRIANGLES, obj.indices.length, gl.UNSIGNED_SHORT, 0);
-      } else {
-        gl.drawArrays(primitiveType, offset, count);
+      if (obj.vao != null) {
+        this.gl.bindVertexArray(obj.vao);
+        if (obj.indices != null) {
+          gl.drawElements(
+            gl.TRIANGLES,
+            obj.indices.length,
+            gl.UNSIGNED_SHORT,
+            0
+          );
+        } else {
+          gl.drawArrays(gl.TRIANGLES, 0, obj.vertices.length / 9);
+        }
+        this.gl.bindVertexArray(null);
       }
     }
   }

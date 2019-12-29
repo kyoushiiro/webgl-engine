@@ -1,12 +1,12 @@
 'use strict';
 
-import { Rect } from './geometries/Rect.js';
 import { Cube } from './geometries/Cube.js';
 import { Program } from './shaders/Program.js';
 import { Camera } from './Camera.js';
 import { BASE_VERTEX_SOURCE, BASE_FRAGMENT_SOURCE } from './shaders/shaders.js';
 import { Renderer } from './Renderer.js';
 import exampleObj from './../../example.obj';
+import berb from './../../berb.obj';
 import { Obj } from './geometries/Obj.js';
 
 let objectsByShader = {};
@@ -70,7 +70,7 @@ function main() {
   }
 
   document.addEventListener('keydown', function(e) {
-    let speed = 0.1;
+    let speed = 0.03;
     if (e.keyCode == 65) {
       camera.moveEyeRight(-speed);
     } else if (e.keyCode == 68) {
@@ -102,7 +102,7 @@ function main() {
     ],
     ['a_Position', 'a_Color', 'a_Normal']
   );
-  gl.useProgram(baseShader.program);
+  // gl.useProgram(baseShader.program);
   objectsByShader[baseShader] = [];
 
   let color = [0.8, 0.5, 0.7, 1];
@@ -114,9 +114,15 @@ function main() {
     new Cube(baseShader, 0, 0, -10, 1, 1, 1, color)
   );
 
-  let obj = new Obj(baseShader, exampleObj);
-  obj.modelMatrix.translate(0, 2, 0);
-  objectsByShader[baseShader].push(obj);
+  let monkey = new Obj(baseShader, exampleObj);
+  monkey.modelMatrix.translate(0, 2, 0);
+  objectsByShader[baseShader].push(monkey);
+
+  let berbObj = new Obj(baseShader, berb);
+  berbObj.modelMatrix.translate(0, 0, -5);
+  berbObj.modelMatrix.scale(0.005, 0.005, 0.005);
+  console.log(berb);
+  objectsByShader[baseShader].push(berbObj);
 
   camera = new Camera(
     eyeX,

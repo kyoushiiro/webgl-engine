@@ -1,14 +1,33 @@
 import { RenderObj } from './RenderObj.js';
-import { Matrix4 } from '../Matrix4.js';
 
 export class Obj extends RenderObj {
   constructor(prog, meshData) {
     super(prog);
 
     [this.vertices, this.indices] = this.createVertices(meshData);
+    this.vao = null;
+    this.createBuffers();
   }
 
   createVertices(meshData) {
+    if (meshData.indices.some(e => e > 65000)) {
+      let vertices = new Float32Array(meshData.indices.length * 9);
+      for (let i = 0; i < meshData.indices.length; i++) {
+        let j = i * 9;
+        let idx = meshData.indices[i] * 3;
+        vertices[j] = meshData.vertices[idx];
+        vertices[j + 1] = meshData.vertices[idx + 1];
+        vertices[j + 2] = meshData.vertices[idx + 2];
+        vertices[j + 3] = 0.3;
+        vertices[j + 4] = 0.5;
+        vertices[j + 5] = 0.6;
+        vertices[j + 6] = meshData.vertexNormals[idx];
+        vertices[j + 7] = meshData.vertexNormals[idx + 1];
+        vertices[j + 8] = meshData.vertexNormals[idx + 2];
+      }
+      return [vertices, null];
+    }
+
     let vertices = new Float32Array(meshData.vertices.length * 3);
     for (let i = 0; i < meshData.vertices.length * 3; i += 9) {
       let j = i / 3;

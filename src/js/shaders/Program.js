@@ -4,6 +4,7 @@ export class Program {
     let fragmentShader = Program.createShader(gl, gl.FRAGMENT_SHADER, fShader);
     let program = Program.createProgram(gl, vertexShader, fragmentShader);
 
+    this.gl = gl;
     this.shader = program;
     this.name = name;
     this.uniforms = this.getUniforms(gl, uniforms);

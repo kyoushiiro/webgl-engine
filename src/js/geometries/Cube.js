@@ -28,6 +28,8 @@ export class Cube extends RenderObj {
       depth,
       color
     );
+
+    this.createBuffers();
   }
 
   createVertices(x, y, z, width, height, depth, color) {
