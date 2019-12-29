@@ -10,6 +10,8 @@ export class Obj extends RenderObj {
   }
 
   createVertices(meshData) {
+    // If the mesh contains more indices than a 16bit number,
+    // we'll have to use drawArrays rather than drawElements
     if (meshData.indices.some(e => e > 65000)) {
       let vertices = new Float32Array(meshData.indices.length * 9);
       for (let i = 0; i < meshData.indices.length; i++) {
@@ -28,6 +30,8 @@ export class Obj extends RenderObj {
       return [vertices, null];
     }
 
+    // Otherwise, save memory usage by returning a vertex array
+    // and an index array
     let vertices = new Float32Array(meshData.vertices.length * 3);
     for (let i = 0; i < meshData.vertices.length * 3; i += 9) {
       let j = i / 3;

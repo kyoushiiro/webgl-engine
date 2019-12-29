@@ -5,9 +5,9 @@ import { Program } from './shaders/Program.js';
 import { Camera } from './Camera.js';
 import { BASE_VERTEX_SOURCE, BASE_FRAGMENT_SOURCE } from './shaders/shaders.js';
 import { Renderer } from './Renderer.js';
-import exampleObj from './../../example.obj';
-import berb from './../../berb.obj';
 import { Obj } from './geometries/Obj.js';
+import exampleObj from './../models/example.obj';
+import berb from './../models/berb.obj';
 
 let objectsByShader = {};
 let camera = null;
@@ -37,7 +37,7 @@ function main() {
   // Update the current slider value (each time you drag the slider handle)
   slider_fov.oninput = function() {
     fov = this.value;
-    drawScene(canvas);
+    drawScene(objectsByShader);
   };
 
   canvas.requestPointerLock =
@@ -66,7 +66,7 @@ function main() {
   function updateRotation(e) {
     yaw -= e.movementX * 0.003;
     pitch -= e.movementY * 0.003;
-    drawScene();
+    drawScene(objectsByShader);
   }
 
   document.addEventListener('keydown', function(e) {
@@ -82,7 +82,7 @@ function main() {
     } else {
       return;
     }
-    drawScene(canvas);
+    drawScene(objectsByShader);
   });
 
   let baseShader = new Program(
@@ -102,7 +102,6 @@ function main() {
     ],
     ['a_Position', 'a_Color', 'a_Normal']
   );
-  // gl.useProgram(baseShader.program);
   objectsByShader[baseShader] = [];
 
   let color = [0.8, 0.5, 0.7, 1];
@@ -114,6 +113,46 @@ function main() {
     new Cube(baseShader, 0, 0, -10, 1, 1, 1, color)
   );
 
+  let c, vert, ind;
+  c = new Cube(
+    baseShader,
+    Math.random() * 100 - 50,
+    Math.random() * 5,
+    Math.random() * 100 - 50,
+    Math.random() * 5,
+    Math.random() * 5,
+    Math.random() * 5,
+    color
+  );
+  let numBoxes = 20000;
+  let vertices = new Float32Array(numBoxes * 24 * 9);
+  let indices = new Uint16Array(numBoxes * 36);
+  for (let i = 0; i < numBoxes; i++) {
+    color = [Math.random() + 0.2, Math.random() + 0.2, Math.random() + 0.2, 1];
+    [vert, ind] = c.createVertices(
+      Math.random() * 100 - 50,
+      Math.random() * 5,
+      Math.random() * 100 - 50,
+      Math.random() * 0.75,
+      Math.random() * 0.75,
+      Math.random() * 0.75,
+      color
+    );
+    let x = i * 24 * 9;
+    for (let j = 0; j < 24 * 9; j++) {
+      vertices[x + j] = vert[j];
+    }
+    let x2 = i * 36;
+    for (let j = 0; j < 36; j++) {
+      indices[x2 + j] = ind[j] + i * 24;
+    }
+  }
+  c.vertices = vertices;
+  c.indices = indices;
+  c.createBuffers();
+  objectsByShader[baseShader].push(c);
+  (vert = null), (ind = null);
+
   let monkey = new Obj(baseShader, exampleObj);
   monkey.modelMatrix.translate(0, 2, 0);
   objectsByShader[baseShader].push(monkey);
@@ -121,7 +160,6 @@ function main() {
   let berbObj = new Obj(baseShader, berb);
   berbObj.modelMatrix.translate(0, 0, -5);
   berbObj.modelMatrix.scale(0.005, 0.005, 0.005);
-  console.log(berb);
   objectsByShader[baseShader].push(berbObj);
 
   camera = new Camera(
@@ -133,17 +171,14 @@ function main() {
     canvas.width / canvas.height,
     fov
   );
-  camera.updateFPSView(pitch, yaw);
   r = new Renderer(canvas, gl);
-  drawScene();
+  gl.useProgram(baseShader.shader);
+  drawScene(objectsByShader);
 }
 
-function drawScene() {
+function drawScene(scene) {
   camera.updateFPSView(pitch, yaw);
-  // camera.updateEye(eyeX, eyeY, eyeZ);
-  for (let objList of Object.keys(objectsByShader)) {
-    r.render(objectsByShader[objList], camera);
-  }
+  r.render(scene, camera);
 }
 
 //----------------------------------

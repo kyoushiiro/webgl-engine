@@ -10,6 +10,8 @@ export class RenderObj {
     this.vertices = null;
     this.indices = null;
     this.vao = null;
+    this.vertexlength = 0;
+    this.indexlength = 0;
   }
 
   createBuffers() {
@@ -17,6 +19,7 @@ export class RenderObj {
       console.error('Cannot create buffers for object with no vertex data!');
       return;
     }
+
     let gl = this.program.gl;
     let vao = gl.createVertexArray();
     gl.bindVertexArray(vao);
@@ -44,12 +47,15 @@ export class RenderObj {
       let indexBuffer = gl.createBuffer();
       gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, indexBuffer);
       gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, this.indices, gl.STATIC_DRAW);
+      this.indexlength = this.indices.length;
+      this.indices = null;
     }
 
     this.vao = vao;
     gl.bindVertexArray(null);
 
-    // this.vertices = null;
+    this.vertexlength = this.vertices.length / 3;
+    this.vertices = null;
   }
 
   render() {
